@@ -88,6 +88,44 @@
 
       map.add(layer);
 
+      fetch('./merged_data.json')
+        .then(response => response.json())
+        .then(data => {
+          // data.results contains the places
+         displayPlaces(data.results);
+        //  console.log(data);
+        });
+      
+// https://maps.googleapis.com/maps/api/place/textsearch/json?query=veterinarians+in+Tampa&key=AIzaSyARk3fdV_9HAtEVdmE25YYzzIWpD-27NUw
+
+      function displayPlaces(places) {
+        require(['esri/Graphic', 'esri/geometry/Point'], function (Graphic, Point) {
+          places.forEach(place => {
+            var point = new Point({
+              longitude: place.geometry.location.lng,
+              latitude: place.geometry.location.lat
+            });
+
+            var markerSymbol = {
+              type: "simple-marker",
+              color: [226, 119, 40],
+              outline: {
+                color: [255, 255, 255],
+                width: 1
+              }
+            };
+
+            var pointGraphic = new Graphic({
+              geometry: point,
+              symbol: markerSymbol
+            });
+
+            view.graphics.add(pointGraphic);
+          });
+        });
+      }
+
+
 
     });
   </script>
