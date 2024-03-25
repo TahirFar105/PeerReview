@@ -37,6 +37,22 @@
     .addRecordBtn:hover {
       background-color: #005a87;
     }
+
+    .legend-icon {
+      width: 15px;  /* Adjust as needed */
+      height: 15px; /* Adjust as needed */
+    }
+
+    .legend {
+      position: absolute;
+      top: -50px;    /* Adjust as needed */
+      right: 0px;  /* Adjust as needed */
+      background-color: white;
+      padding: 10px;
+      border: 1px solid #000;
+      z-index: 99;  /* Ensure the legend appears above other elements */
+    }
+
   </style>
   <!-- import the css file -->
   <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
@@ -45,7 +61,20 @@
 
   <!-- import the esri modules from the API -->
   <script>
-    require(["esri/config", "esri/Map", "esri/views/MapView", "esri/widgets/Locate", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Legend"], (esriConfig, Map, MapView, Locate, Search, Featurelayer, Legend) => {
+    require([
+  "esri/config", 
+  "esri/Map", 
+  "esri/views/MapView", 
+  "esri/widgets/Locate", 
+  "esri/widgets/Search", 
+  "esri/layers/FeatureLayer", 
+  "esri/widgets/Legend",
+  "esri/Graphic",
+  "esri/geometry/Point",
+  "esri/layers/GraphicsLayer",
+  "esri/PopupTemplate",
+  "esri/symbols/PictureMarkerSymbol"
+], (esriConfig, Map, MapView, Locate, Search, FeatureLayer, Legend, Graphic, Point, GraphicsLayer, PopupTemplate, PictureMarkerSymbol) => {
 
       esriConfig.apiKey = "AAPK0bcf3be97f2f477b847094cc3f93a15bFUqgC48X1eCFBejkZZxhltF6wYGP8yCnJLEWyFcqBmpG88NVXD_PgTB-NFvT_xUG";
 
@@ -88,7 +117,7 @@
       view.ui.add(legend, "bottom-right");
 
       // Create featurelayer from feature service 
-      const layer = new Featurelayer({
+      const layer = new FeatureLayer({
         //URL of the rest API from AGOL Survey Results
         url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_34841985782348998c075a580564d747_results/FeatureServer",
         title: "Lost and Found Pets",
@@ -117,72 +146,76 @@
 
       map.add(layer);
 
-      fetch('./merged_data.json')
-        .then(response => response.json())
-        .then(data => {
-          // data.results contains the places
-          displayPlaces(data.results);
+      var graphicsLayer = new GraphicsLayer();
+  map.add(graphicsLayer);
 
+  fetch('./merged_data.json')
+    .then(response => response.json())
+    .then(data => {
+      data.results.forEach(place => {
+        var point = new Point({
+          longitude: place.geometry.location.lng,
+          latitude: place.geometry.location.lat
         });
 
-      // https://maps.googleapis.com/maps/api/place/textsearch/json?query=veterinarians+in+Tampa&key=APIKey - Used to get json files of veterinary clinics in different cities of Florida and then merged them together.
+        var markerSymbol = new PictureMarkerSymbol({
+          url: "veterinarian.png",
+          width: "48px",
+          height: "48px"
+        });
 
-      function displayPlaces(places) {
-        require(['esri/Graphic', 'esri/geometry/Point', 'esri/PopupTemplate', 'esri/symbols/PictureMarkerSymbol'], function (Graphic, Point, PopupTemplate, PictureMarkerSymbol) {
-          places.forEach(place => {
-            var point = new Point({
-              longitude: place.geometry.location.lng,
-              latitude: place.geometry.location.lat
-            });
-
-            var markerSymbol = new PictureMarkerSymbol({
-              url: "veterinarian.png", // source: <a href="https://www.flaticon.com/free-icons/veterinarian" title="veterinarian icons">Veterinarian icons created by Freepik - Flaticon</a>
-              width: "48px",
-              height: "48px"
-            });
-
-            var popupTemplate = new PopupTemplate({
-              title: "{name}",
-              content: [
+        var popupTemplate = new PopupTemplate({
+          title: "{name}",
+          content: [
+            {
+              type: "fields",
+              fieldInfos: [
                 {
-                  type: "fields",
-                  fieldInfos: [
-                    {
-                      fieldName: "name",
-                      label: "Clinic Name"
-                    },
-                    {
-                      fieldName: "formatted_address",
-                      label: "Address"
-                    },
-                    {
-                      fieldName: "rating",
-                      label: "Rating"
-                    }
-                  ]
+                  fieldName: "name",
+                  label: "Clinic Name"
+                },
+                {
+                  fieldName: "formatted_address",
+                  label: "Address"
+                },
+                {
+                  fieldName: "rating",
+                  label: "Rating"
                 }
               ]
-            });
-
-            var pointGraphic = new Graphic({
-              geometry: point,
-              symbol: markerSymbol,
-              attributes: {
-                name: place.name,
-                formatted_address: place.formatted_address,
-                rating: place.rating
-              },
-              popupTemplate: popupTemplate
-            });
-
-            view.graphics.add(pointGraphic);
-          });
+            }
+          ]
         });
-      }
 
+        var graphic = new Graphic({
+          geometry: point,
+          symbol: markerSymbol,
+          attributes: place,
+          popupTemplate: popupTemplate
+        });
+
+        graphicsLayer.add(graphic);
+      });
+
+      // Create a new div for the legend
+    var legendDiv = document.createElement('div');
+    legendDiv.className = 'legend';
+
+// Create a new entry for the graphics layer
+var graphicsLayerEntry = document.createElement('div');
+    graphicsLayerEntry.innerHTML = '<img class="legend-icon" src="veterinarian.png"> Veterinarian Clinics';
+
+// Add the entry to the legend
+legendDiv.appendChild(graphicsLayerEntry);
+
+// Add the legend to the view
+view.ui.add(legendDiv, 'bottom-right');
+});
 
 
     });
+
+      
   </script>
 
 </head>
@@ -192,6 +225,8 @@
   <a href="https://arcg.is/0rP5ja1" target="_blank" class="addRecordBtn">Report Lost or Found Pet</a>
 
   <div id="viewDiv"></div>
+  
+
 </body>
 
 </html>
