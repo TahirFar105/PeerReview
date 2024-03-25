@@ -82,8 +82,8 @@
 
       // Create featurelayer from feature service 
       const layer = new Featurelayer({
-        // URL to the service 
-        url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_a041e0349f144d56a5420ea1b36617a9_results/FeatureServer" //Your item URL Goes Here
+    
+        url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_34841985782348998c075a580564d747_results/FeatureServer" //URL of the rest API from AGOL Survey Results
       });
 
       map.add(layer);
@@ -96,10 +96,10 @@
         //  console.log(data);
         });
       
-// https://maps.googleapis.com/maps/api/place/textsearch/json?query=veterinarians+in+Tampa&key=AIzaSyARk3fdV_9HAtEVdmE25YYzzIWpD-27NUw
+// https://maps.googleapis.com/maps/api/place/textsearch/json?query=veterinarians+in+Tampa&key=APIKey - Used to get veterinary clinics in different cities of Florida and then merged them together.
 
       function displayPlaces(places) {
-        require(['esri/Graphic', 'esri/geometry/Point'], function (Graphic, Point) {
+        require(['esri/Graphic', 'esri/geometry/Point', 'esri/PopupTemplate'], function (Graphic, Point, PopupTemplate) {
           places.forEach(place => {
             var point = new Point({
               longitude: place.geometry.location.lng,
@@ -115,9 +115,21 @@
               }
             };
 
+            var popupTemplate = new PopupTemplate({
+            title: "{name}",
+            content: "{formatted_address}", 
+            content: "{rating}"
+            });
+
             var pointGraphic = new Graphic({
               geometry: point,
-              symbol: markerSymbol
+              symbol: markerSymbol,
+              attributes: {
+          name: place.name,
+          formatted_address: place.formatted_address,
+          rating: place.rating
+        },
+              popupTemplate: popupTemplate
             });
 
             view.graphics.add(pointGraphic);
@@ -134,7 +146,7 @@
 
 <body>
 
-  <a href="https://arcg.is/0rP5ja1" target="_blank" class="addRecordBtn">Add Event</a>
+  <a href="https://arcg.is/0rP5ja1" target="_blank" class="addRecordBtn">Report Lost or Found Pet</a>
 
   <div id="viewDiv"></div>
 </body>
