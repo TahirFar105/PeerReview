@@ -82,13 +82,29 @@
 
       // Create featurelayer from feature service 
       const layer = new Featurelayer({
-    //URL of the rest API from AGOL Survey Results
+        //URL of the rest API from AGOL Survey Results
         url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_34841985782348998c075a580564d747_results/FeatureServer",
         popupTemplate: { // autocasts as new PopupTemplate()
-        title: "{what_type_of_pet_is_this_ie_tab}", 
-        content: "{please_add_the_date_and_time_th}",
-        content: "{PhotosAndFiles}",
-  }
+          title: "{what_type_of_pet_is_this_ie_tab}",
+          content: [
+            {
+              type: "fields",
+              fieldInfos: [
+                {
+                  fieldName: "please_add_the_date_and_time_th",
+                  label: "Date and Time Last Seen"
+                },
+                {
+                  fieldName: "Photos And Files",
+                  label: "Files"
+                }
+              ]
+            },
+            {
+              type: "attachments"
+            }
+          ]
+        }
       });
 
       map.add(layer);
@@ -97,11 +113,11 @@
         .then(response => response.json())
         .then(data => {
           // data.results contains the places
-         displayPlaces(data.results);
-        //  console.log(data);
+          displayPlaces(data.results);
+          //  console.log(data);
         });
-      
-// https://maps.googleapis.com/maps/api/place/textsearch/json?query=veterinarians+in+Tampa&key=APIKey - Used to get veterinary clinics in different cities of Florida and then merged them together.
+
+      // https://maps.googleapis.com/maps/api/place/textsearch/json?query=veterinarians+in+Tampa&key=APIKey - Used to get veterinary clinics in different cities of Florida and then merged them together.
 
       function displayPlaces(places) {
         require(['esri/Graphic', 'esri/geometry/Point', 'esri/PopupTemplate', 'esri/symbols/PictureMarkerSymbol'], function (Graphic, Point, PopupTemplate, PictureMarkerSymbol) {
@@ -112,25 +128,42 @@
             });
 
             var markerSymbol = new PictureMarkerSymbol({
-      url: "veterinarian.png", // source: <a href="https://www.flaticon.com/free-icons/veterinarian" title="veterinarian icons">Veterinarian icons created by Freepik - Flaticon</a>
-      width: "48px",
-      height: "48px"
-    });
+              url: "veterinarian.png", // source: <a href="https://www.flaticon.com/free-icons/veterinarian" title="veterinarian icons">Veterinarian icons created by Freepik - Flaticon</a>
+              width: "48px",
+              height: "48px"
+            });
 
             var popupTemplate = new PopupTemplate({
-            title: "{name}",
-            content: "{formatted_address}", 
-            content: "{rating}"
+              title: "{name}",
+              content: [
+                {
+                  type: "fields",
+                  fieldInfos: [
+                    {
+                      fieldName: "name",
+                      label: "Clinic Name"
+                    },
+                    {
+                      fieldName: "formatted_address",
+                      label: "Address"
+                    },
+                    {
+                      fieldName: "rating",
+                      label: "Rating"
+                    }
+                  ]
+                }
+              ]
             });
 
             var pointGraphic = new Graphic({
               geometry: point,
               symbol: markerSymbol,
               attributes: {
-          name: place.name,
-          formatted_address: place.formatted_address,
-          rating: place.rating
-        },
+                name: place.name,
+                formatted_address: place.formatted_address,
+                rating: place.rating
+              },
               popupTemplate: popupTemplate
             });
 
