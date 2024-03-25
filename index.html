@@ -45,7 +45,7 @@
 
   <!-- import the esri modules from the API -->
   <script>
-    require(["esri/config", "esri/Map", "esri/views/MapView", "esri/widgets/Locate", "esri/widgets/Search", "esri/layers/FeatureLayer"], (esriConfig, Map, MapView, Locate, Search, Featurelayer) => {
+    require(["esri/config", "esri/Map", "esri/views/MapView", "esri/widgets/Locate", "esri/widgets/Search", "esri/layers/FeatureLayer", "esri/widgets/Legend"], (esriConfig, Map, MapView, Locate, Search, Featurelayer, Legend) => {
 
       esriConfig.apiKey = "AAPK0bcf3be97f2f477b847094cc3f93a15bFUqgC48X1eCFBejkZZxhltF6wYGP8yCnJLEWyFcqBmpG88NVXD_PgTB-NFvT_xUG";
 
@@ -80,10 +80,18 @@
         index: 2
       });
 
+      // Add a legend
+      const legend = new Legend({
+        view: view
+      });
+
+      view.ui.add(legend, "bottom-right");
+
       // Create featurelayer from feature service 
       const layer = new Featurelayer({
         //URL of the rest API from AGOL Survey Results
         url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_34841985782348998c075a580564d747_results/FeatureServer",
+        title: "Lost and Found Pets",
         popupTemplate: { // autocasts as new PopupTemplate()
           title: "{what_type_of_pet_is_this_ie_tab}",
           content: [
@@ -114,10 +122,10 @@
         .then(data => {
           // data.results contains the places
           displayPlaces(data.results);
-          //  console.log(data);
+
         });
 
-      // https://maps.googleapis.com/maps/api/place/textsearch/json?query=veterinarians+in+Tampa&key=APIKey - Used to get veterinary clinics in different cities of Florida and then merged them together.
+      // https://maps.googleapis.com/maps/api/place/textsearch/json?query=veterinarians+in+Tampa&key=APIKey - Used to get json files of veterinary clinics in different cities of Florida and then merged them together.
 
       function displayPlaces(places) {
         require(['esri/Graphic', 'esri/geometry/Point', 'esri/PopupTemplate', 'esri/symbols/PictureMarkerSymbol'], function (Graphic, Point, PopupTemplate, PictureMarkerSymbol) {
