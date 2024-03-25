@@ -82,8 +82,13 @@
 
       // Create featurelayer from feature service 
       const layer = new Featurelayer({
-    
-        url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_34841985782348998c075a580564d747_results/FeatureServer" //URL of the rest API from AGOL Survey Results
+    //URL of the rest API from AGOL Survey Results
+        url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/survey123_34841985782348998c075a580564d747_results/FeatureServer",
+        popupTemplate: { // autocasts as new PopupTemplate()
+        title: "{what_type_of_pet_is_this_ie_tab}", 
+        content: "{please_add_the_date_and_time_th}",
+        content: "{PhotosAndFiles}",
+  }
       });
 
       map.add(layer);
@@ -99,21 +104,18 @@
 // https://maps.googleapis.com/maps/api/place/textsearch/json?query=veterinarians+in+Tampa&key=APIKey - Used to get veterinary clinics in different cities of Florida and then merged them together.
 
       function displayPlaces(places) {
-        require(['esri/Graphic', 'esri/geometry/Point', 'esri/PopupTemplate'], function (Graphic, Point, PopupTemplate) {
+        require(['esri/Graphic', 'esri/geometry/Point', 'esri/PopupTemplate', 'esri/symbols/PictureMarkerSymbol'], function (Graphic, Point, PopupTemplate, PictureMarkerSymbol) {
           places.forEach(place => {
             var point = new Point({
               longitude: place.geometry.location.lng,
               latitude: place.geometry.location.lat
             });
 
-            var markerSymbol = {
-              type: "simple-marker",
-              color: [226, 119, 40],
-              outline: {
-                color: [255, 255, 255],
-                width: 1
-              }
-            };
+            var markerSymbol = new PictureMarkerSymbol({
+      url: "veterinarian.png", // source: <a href="https://www.flaticon.com/free-icons/veterinarian" title="veterinarian icons">Veterinarian icons created by Freepik - Flaticon</a>
+      width: "48px",
+      height: "48px"
+    });
 
             var popupTemplate = new PopupTemplate({
             title: "{name}",
