@@ -95,9 +95,7 @@
   "esri/layers/GraphicsLayer",
   "esri/PopupTemplate",
   "esri/symbols/PictureMarkerSymbol"
-], (esriConfig, Map, MapView, Locate, Search, FeatureLayer, Legend, Graphic, Point, GraphicsLayer, PopupTemplate, PictureMarkerSymbol) => {
-
-      // Set the API key
+], function(esriConfig, Map, MapView, Locate, Search, FeatureLayer, Legend, Graphic, Point, GraphicsLayer, PopupTemplate, PictureMarkerSymbol) {
       esriConfig.apiKey = "AAPK0bcf3be97f2f477b847094cc3f93a15bFUqgC48X1eCFBejkZZxhltF6wYGP8yCnJLEWyFcqBmpG88NVXD_PgTB-NFvT_xUG";
 
       // Create a new map with the streets-navigation-vector basemap
@@ -171,11 +169,15 @@
         }
       });
 
+    }, function(error) {
+  console.error('Error:', error);
+  
+  // Create a new map with the streets-navigation-vector basemap
       // Add the layer to the map
       map.add(layer);
 
-      // Create a new GraphicsLayer to hold the Veterinarian Clinic locations
-      const graphicsLayer = new GraphicsLayer();    
+      // Create a new GraphicsLayer
+      var graphicsLayer = new GraphicsLayer();
       // Add the GraphicsLayer to the map
       map.add(graphicsLayer);
 
@@ -243,10 +245,9 @@
 
           // Add the legend to the view
           view.ui.add(legendDiv, 'bottom-right');
-        })
-      .catch(error => console.error('Error:', error)); // This is where the .catch block goes   
-
-    });
+        });
+      })
+     .catch(error => console.error('Error:', error));
 
   </script>
 
